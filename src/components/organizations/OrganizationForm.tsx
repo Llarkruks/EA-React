@@ -9,8 +9,6 @@ const schema = z.object({
   name: z
     .string()
     .min(3, { message: 'Name must be at least 3 characters.' }),
-  address: z.string().optional(),
-  description: z.string().optional(),
 });
 
 export type OrganizationFormData = z.infer<typeof schema>;
@@ -37,8 +35,6 @@ const OrganizationForm = ({ onSubmit, initialData, onCancel }: Props) => {
     if (initialData) {
       reset({
         name: initialData.name,
-        address: initialData.address,
-        description: initialData.description,
       });
     }
   }, [initialData, reset]);
@@ -67,36 +63,6 @@ const OrganizationForm = ({ onSubmit, initialData, onCancel }: Props) => {
         />
         {errors.name && (
           <p className="text-danger">{errors.name.message}</p>
-        )}
-      </div>
-
-      <div className="mb-3">
-        <label htmlFor="address" className="form-label">
-          Address
-        </label>
-        <input
-          {...register('address')}
-          id="address"
-          type="text"
-          className="form-control"
-        />
-        {errors.address && (
-          <p className="text-danger">{errors.address.message}</p>
-        )}
-      </div>
-
-      <div className="mb-3">
-        <label htmlFor="description" className="form-label">
-          Description
-        </label>
-        <textarea
-          {...register('description')}
-          id="description"
-          className="form-control"
-          rows={3}
-        />
-        {errors.description && (
-          <p className="text-danger">{errors.description.message}</p>
         )}
       </div>
 

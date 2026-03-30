@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import organizationService from '../services/organization-service';
+import activityService from '../services/activity-service';
 import { CanceledError } from '../services/api-client';
 import { Organization } from '../models/Organization';
 
@@ -22,7 +23,6 @@ export const useOrganization = (): UseOrganizationsReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Fetch organizations on component mount
   useEffect(() => {
     fetchOrganizations();
   }, []);
@@ -45,7 +45,6 @@ export const useOrganization = (): UseOrganizationsReturn => {
   };
 
   const createOrganization = async (data: Omit<Organization, '_id'>) => {
-    // Optimistic update with temporary ID
     const tempOrg: Organization = {
       _id: 'temp_' + Date.now(),
       ...data,
@@ -56,9 +55,17 @@ export const useOrganization = (): UseOrganizationsReturn => {
     try {
       const res = await organizationService.create(data);
       const savedOrg = res.data as Organization;
+
       setOrganizations((prevOrgs) =>
         prevOrgs.map((o) => (o._id === tempOrg._id ? savedOrg : o))
       );
+
+      activityService.registerActivity({
+        action: 'create',
+        entityType: 'organization',
+        entityId: savedOrg._id,
+        entityName: savedOrg.name,
+      });
     } catch (err) {
       setError((err as Error).message);
       setOrganizations(originalOrganizations);
@@ -74,6 +81,13 @@ export const useOrganization = (): UseOrganizationsReturn => {
 
     try {
       await organizationService.update(organization);
+
+      activityService.registerActivity({
+        action: 'update',
+        entityType: 'organization',
+        entityId: organization._id,
+        entityName: organization.name,
+      });
     } catch (err) {
       setError((err as Error).message);
       setOrganizations(originalOrganizations);
@@ -83,10 +97,21 @@ export const useOrganization = (): UseOrganizationsReturn => {
 
   const deleteOrganization = async (organizationId: string) => {
     const originalOrganizations = [...organizations];
+    const organizationToDelete = organizations.find((o) => o._id === organizationId);
+
     setOrganizations(organizations.filter((o) => o._id !== organizationId));
 
     try {
       await organizationService.delete(organizationId);
+
+      if (organizationToDelete) {
+        activityService.registerActivity({
+          action: 'delete',
+          entityType: 'organization',
+          entityId: organizationToDelete._id,
+          entityName: organizationToDelete.name,
+        });
+      }
     } catch (err) {
       setError((err as Error).message);
       setOrganizations(originalOrganizations);
@@ -104,4 +129,3 @@ export const useOrganization = (): UseOrganizationsReturn => {
     fetchOrganizations,
   };
 };
-

@@ -11,21 +11,36 @@ import Button from '../Button/Button';
  * Handles state for form visibility and editing
  */
 const OrganizationManagement = () => {
-  const { organizations, loading, error, createOrganization, updateOrganization, deleteOrganization } = useOrganization();
+  const {
+    organizations,
+    loading,
+    error,
+    createOrganization,
+    updateOrganization,
+    deleteOrganization,
+  } = useOrganization();
+
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSave = async (data: OrganizationFormData) => {
+    const apiPayload = {
+      name: data.name,
+    };
+
     try {
       if (editingOrg) {
-        // Update existing organization
-        const updatedOrg = { ...editingOrg, ...data } as Organization;
+        const updatedOrg = {
+          ...editingOrg,
+          ...apiPayload,
+        } as Organization;
+
         await updateOrganization(updatedOrg);
       } else {
-        // Create new organization
-        await createOrganization(data as Omit<Organization, '_id'>);
+        await createOrganization(apiPayload as Omit<Organization, '_id'>);
       }
+
       setShowForm(false);
       setEditingOrg(null);
     } catch {
@@ -103,6 +118,5 @@ const OrganizationManagement = () => {
     </div>
   );
 };
-
 
 export default OrganizationManagement;

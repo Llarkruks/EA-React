@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import userService from '../services/user-service';
 import organizationService from '../services/organization-service';
+import activityService from '../services/activity-service';
 import { CanceledError } from '../services/api-client';
 import { User } from '../models/User';
 import { Organization } from '../models/Organization';
@@ -26,7 +27,6 @@ export const useUser = (): UseUsersReturn => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Fetch users and organizations on component mount
   useEffect(() => {
     fetchUsers();
     fetchOrganizations();
@@ -63,7 +63,6 @@ export const useUser = (): UseUsersReturn => {
   };
 
   const createUser = async (data: Omit<User, '_id'>) => {
-    // Optimistic update with temporary ID
     const tempUser: User = {
       _id: 'temp_' + Date.now(),
       ...data,
@@ -74,9 +73,17 @@ export const useUser = (): UseUsersReturn => {
     try {
       const res = await userService.create(data);
       const savedUser = res.data as User;
+
       setUsers((prevUsers) =>
         prevUsers.map((u) => (u._id === tempUser._id ? savedUser : u))
       );
+
+      activityService.registerActivity({
+        action: 'create',
+        entityType: 'user',
+        entityId: savedUser._id,
+        entityName: savedUser.name,
+      });
     } catch (err) {
       setError((err as Error).message);
       setUsers(originalUsers);
@@ -90,6 +97,13 @@ export const useUser = (): UseUsersReturn => {
 
     try {
       await userService.update(user);
+
+      activityService.registerActivity({
+        action: 'update',
+        entityType: 'user',
+        entityId: user._id,
+        entityName: user.name,
+      });
     } catch (err) {
       setError((err as Error).message);
       setUsers(originalUsers);
@@ -99,10 +113,21 @@ export const useUser = (): UseUsersReturn => {
 
   const deleteUser = async (userId: string) => {
     const originalUsers = [...users];
+    const userToDelete = users.find((u) => u._id === userId);
+
     setUsers(users.filter((u) => u._id !== userId));
 
     try {
       await userService.delete(userId);
+
+      if (userToDelete) {
+        activityService.registerActivity({
+          action: 'delete',
+          entityType: 'user',
+          entityId: userToDelete._id,
+          entityName: userToDelete.name,
+        });
+      }
     } catch (err) {
       setError((err as Error).message);
       setUsers(originalUsers);
@@ -121,4 +146,3 @@ export const useUser = (): UseUsersReturn => {
     fetchUsers,
   };
 };
-

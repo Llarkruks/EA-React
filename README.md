@@ -1,3 +1,18 @@
+### Documentació
+
+**Referències**
+- Apunts i explicacions del professor a classe.
+- Presentació dels companys sobre el seminari: https://docs.google.com/presentation/d/1rH6mLNtRUFduipy3R1lBrt-1olZ39otn/edit?usp=sharing&ouid=111932312940133032162&rtpof=true&sd=true
+
+**Ús de la IA generativa**  
+S’ha utilitzat ChatGPT com a suport durant el desenvolupament de tot l’exercici, especialment en els següents aspectes:
+- Ajuda en la integració del registre d’activitats dins dels hooks de users i organizations (inicialment no sabia on implementarles), perquè les accions de crear, editar i eliminar quedessin registrades automàticament.
+- La creació del nou component visual per mostrar l’historial d’activitat dins l’aplicació.
+- L’ajuda en la resolució d’errors detectats durant les proves, especialment en la part d’organitzacions, on es va haver d’adaptar el frontend a les validacions reals del backend.
+
+
+
+
 # React User and Organization Management Application
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
